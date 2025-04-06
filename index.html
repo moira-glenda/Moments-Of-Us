@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOMENTS OF US</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    
+    body {
+      background-color: #0c0c14;
+      color: #e0e0ff;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+    
+    header {
+      margin-bottom: 3rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeIn 1s forwards 0.5s;
+      position: relative;
+      z-index: 5;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #ff3e6c, #ff0033);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #ffb0b0;
+    }
+    
+    .story-container {
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
+    }
+    
+    .timeline {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 4px;
+      height: 0;
+      background: linear-gradient(to bottom, #ff3e6c, #ff0033);
+      transform: translateX(-50%);
+      transition: height 3s ease;
+    }
+    
+    .story-moment {
+      width: 80%;
+      margin: 6rem auto;
+      display: flex;
+      align-items: center;
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s ease;
+    }
+    
+    .moment-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .image-container {
+      width: 60%;
+      height: 400px;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(255, 62, 108, 0.3);
+    }
+    
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .story-text {
+      width: 40%;
+      padding: 2rem;
+    }
+    
+    .story-text h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #ff3e6c;
+    }
+    
+    .story-text p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ffb0b0;
+    }
+    
+    .moment-left .image-container {
+      order: 1;
+      margin-right: 2rem;
+    }
+    
+    .moment-left .story-text {
+      order: 2;
+      text-align: left;
+    }
+    
+    .moment-right .image-container {
+      order: 2;
+      margin-left: 2rem;
+    }
+    
+    .moment-right .story-text {
+      order: 1;
+      text-align: right;
+    }
+    
+    .time-marker {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #ff3e6c;
+      border-radius: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      box-shadow: 0 0 20px rgba(255, 62, 108, 0.8);
+    }
+    
+    .time-marker::before {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff0033;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 2s infinite;
+    }
+    
+    /* Heart bubbles */
+    .hearts-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff3e6c'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center center;
+      opacity: 0.8;
+      animation: float-up var(--duration, 15s) linear infinite;
+      bottom: -100px;
+      left: var(--left, 50%);
+      filter: drop-shadow(0 0 5px rgba(255, 62, 108, 0.6));
+    }
+    
+    @keyframes float-up {
+      0% {
+        transform: translateY(0) scale(var(--scale, 1)) rotate(var(--rotate, 0deg));
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-100vh) scale(var(--scale, 1)) rotate(var(--rotate-end, 360deg));
+        opacity: 0;
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        width: 50px;
+        height: 50px;
+        opacity: 1;
+      }
+      100% {
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+      }
+    }
+    
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .finale {
+      text-align: center;
+      margin-top: 4rem;
+      opacity: 0;
+      transition: opacity 1s ease;
+      position: relative;
+      z-index: 5;
+    }
+    
+    .finale h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #ff3e6c, #ff0033);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .finale p {
+      font-size: 1.3rem;
+      line-height: 1.8;
+      color: #ffb0b0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .love-icon {
+      font-size: 3rem;
+      display: block;
+      margin: 2rem auto;
+      color: #ff3e6c;
+      animation: heartbeat 1.5s infinite;
+    }
+    
+    @keyframes heartbeat {
+      0% {
+        transform: scale(1);
+      }
+      14% {
+        transform: scale(1.3);
+      }
+      28% {
+        transform: scale(1);
+      }
+      42% {
+        transform: scale(1.3);
+      }
+      70% {
+        transform: scale(1);
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .story-moment {
+        flex-direction: column;
+        width: 90%;
+      }
+      
+      .image-container, .story-text {
+        width: 100%;
+        margin: 1rem 0;
+      }
+      
+      .moment-left .image-container,
+      .moment-right .image-container,
+      .moment-left .story-text,
+      .moment-right .story-text {
+        order: unset;
+        margin: 1rem 0;
+        text-align: center;
+      }
+      
+      .timeline {
+        left: 30px;
+      }
+      
+      .time-marker {
+        left: 30px;
+      }
+
+    }
+
+    @media (max-width: 500px){
+      .story-text p{
+        font-size: 1rem;
+        text-align: left;
+        line-height: 1;
+        font-size: 1.2rem;
+
+      }
+      .story-text {
+      width: 100%;
+      padding: 2rem;
+      }
+      .finale p{
+        padding-left: 12%;
+        line-height: 1;
+        text-align: left;
+      }
+      .timeline {
+      position: absolute;
+      top: 0;
+      left: 5%;
+      width: 4px;
+      height: 0;
+      background: linear-gradient(to bottom, #ff3e6c, #ff0033);
+      transform: translateX(-50%);
+      transition: height 3s ease;
+    }
+    .image-container {
+      width: 100%;
+      height: 400px;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(255, 62, 108, 0.3);
+    }
+    .story-moment {
+      width: 100%;
+    }
+    .story-container{
+      width: 95vw;
+    }
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hearts-container" id="hearts-container"></div>
+      
+        <header>
+          <h1>MOMENTS OF US</h1>
+          <p class="subtitle">This one’s for you — a little piece of my heart</p>
+        </header>
+      
+        <div class="story-container">
+          <div class="timeline"></div>
+      
+          <div class="story-moment moment-left" id="moment1">
+            <div class="time-marker"></div>
+            <div class="image-container">
+              <img src="POEM.png">
+            </div>
+            <div class="story-text">
+              <h2>When You Sent That Poem</h2>
+              <p>I don’t think you know what that poem did to me. It wasn’t just words on a screen — it was emotion, depth, care… and it melted my heart. That was the moment I really started seeing you. That was the moment I started "liking you".</p>
+            </div>
+          </div>
+      
+          <div class="story-moment moment-right" id="moment2">
+            <div class="time-marker"></div>
+            <div class="image-container">
+              <img src="HEART.png" >
+            </div>
+            <div class="story-text">
+              <h2>When My Heart Shifted</h2>
+              <p>You’re different. The way you talk to me — it all matters more than you know. I started looking forward to our chats. You became that part of the day that just… made everything better.</p>
+            </div>
+          </div>
+      
+          <div class="story-moment moment-left" id="moment3">
+            <div class="time-marker"></div>
+            <div class="image-container">
+              <img src="CALM.png" >
+            </div>
+            <div class="story-text">
+              <h2>Your Calm, My Peace</h2>
+              <p>There’s a calmness about you — a quiet strength — and it’s contagious. You help me feel grounded, even on my hectic days. When we talk, I feel peace. Not the kind that comes and goes, but the kind that stays and wraps itself around my heart.</p>
+            </div>
+          </div>
+      
+          <div class="story-moment moment-right" id="moment4">
+            <div class="time-marker"></div>
+            <div class="image-container">
+              <img src="LOOKING.png">
+            </div>
+            <div class="story-text">
+              <h2>Looking Forward</h2>
+              <p>I want this — whatever "this" is between us — to grow. I want to nurture it, protect it, and see where it goes. And more than anything, I want to finally see you. In person. Just to sit next to you, laugh with you, and feel what I already know in my heart — that this is something special.</p>
+            </div>
+          </div>
+      
+          <div class="finale" id="finale">
+            <h2>Just You</h2>
+            <p>I don’t need grand gestures or perfect plans. I just want "you". Your presence, your words, your heart. And I like you — not for what you do, but for who you are. For how you genuinely care. And that? That means everything to me.</p>
+            <span class="love-icon">❤</span>
+            <p style="margin-top: 1em; font-weight: bold;">I like you. For being you and for genuinely caring about me.</p>
+          </div>
+        </div>
+    </div>
+      
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the timeline
+      setTimeout(() => {
+        document.querySelector('.timeline').style.height = '100%';
+      }, 500);
+      
+      // Handle scrolling animations
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('moment-visible');
+            if (entry.target.id === 'moment4') {
+              setTimeout(() => {
+                document.getElementById('finale').style.opacity = '1';
+              }, 1000);
+            }
+          }
+        });
+      }, { threshold: 0.3 });
+      
+      document.querySelectorAll('.story-moment').forEach(moment => {
+        observer.observe(moment);
+      });
+      
+      observer.observe(document.getElementById('finale'));
+      
+      // Hover effect for images
+      document.querySelectorAll('.image-container').forEach(container => {
+        container.addEventListener('mouseenter', () => {
+          container.querySelector('img').style.transform = 'scale(1.05)';
+        });
+        
+        container.addEventListener('mouseleave', () => {
+          container.querySelector('img').style.transform = 'scale(1)';
+        });
+      });
+      
+      // Create floating heart bubbles
+      const heartsContainer = document.getElementById('hearts-container');
+      const createHeart = () => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        
+        // Random size
+        const size = Math.random() * 30 + 10;
+        heart.style.width = `${size}px`;
+        heart.style.height = `${size}px`;
+        
+        // Random position
+        heart.style.setProperty('--left', `${Math.random() * 100}%`);
+        
+        // Random duration
+        heart.style.setProperty('--duration', `${Math.random() * 10 + 10}s`);
+        
+        // Random scale
+        heart.style.setProperty('--scale', `${Math.random() * 0.5 + 0.5}`);
+        
+        // Random rotation
+        heart.style.setProperty('--rotate', `${Math.random() * 360}deg`);
+        heart.style.setProperty('--rotate-end', `${Math.random() * 360}deg`);
+        
+        heartsContainer.appendChild(heart);
+        
+        // Remove heart after animation completes
+        setTimeout(() => {
+          heart.remove();
+        }, parseInt(heart.style.getPropertyValue('--duration')) * 1000);
+      };
+      
+      // Create hearts at intervals
+      setInterval(createHeart, 300);
+      
+      // Create initial set of hearts
+      for (let i = 0; i < 15; i++) {
+        setTimeout(createHeart, i * 200);
+      }
+    });
+  </script>
+</body>
+</html>
